@@ -1,0 +1,38 @@
+name: TimeTree Auto Sync
+
+on:
+  schedule:
+    - cron: '0 */1 * * *' # 每 1 小時執行一次 (時間可自己調)
+  workflow_dispatch:      # 讓你可以手動按按鈕測試
+
+jobs:
+  sync_calendar:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write     # 給機器人寫入檔案的權限
+
+    steps:
+      - name: 1. 下載你的倉庫資料
+        uses: actions/checkout@v4
+
+      - name: 2. 安裝 Python 環境
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      - name: 3. 安裝 TimeTree 匯出工具
+        run: pip install timetree-exporter
+
+      - name: 4. 執行抓取 (使用保險箱裡的帳密)
+        env:
+          TIMETREE_EMAIL: ${{ secrets.TIMETREE_EMAIL }}
+          TIMETREE_PASSWORD: ${{ secrets.TIMETREE_PASSWORD }}
+        run: timetree-exporter --output timetree.ics
+
+      - name: 5. 上傳更新後的檔案
+        run: |
+          git config --global user.name "TimeTreeBot"
+          git config --global user.email "bot@noreply.github.com"
+          git add timetree.ics
+          git commit -m "Auto update calendar" || exit 0
+          git push
