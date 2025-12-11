@@ -27,7 +27,7 @@ jobs:
         env:
           TIMETREE_EMAIL: ${{ secrets.TIMETREE_EMAIL }}
           TIMETREE_PASSWORD: ${{ secrets.TIMETREE_PASSWORD }}
-        run: timetree-exporter --output timetree.ics
+        run: timetree-exporter --output timetree.ics --calendar_code JDeuZiz8jWwq
 
       - name: 5. 上傳更新後的檔案
         run: |
